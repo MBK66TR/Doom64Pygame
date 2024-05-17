@@ -8,6 +8,10 @@ class Player:
         self.x, self.y = PLAYER_POS
         self.angle = PLAYER_ANGLE
 
+        # diagonal movement correction
+        self.diag_move_corr = 1 / math.sqrt(2)
+
+
     def movement(self):
         sin_a = math.sin(self.angle)
         cos_a = math.cos(self.angle)
@@ -18,18 +22,29 @@ class Player:
         speed_cos = speed * cos_a
 
         keys = pg.key.get_pressed()
+        num_key_pressed = -1
         if keys[pg.K_w]:
+            num_key_pressed += 1
             dx += speed_cos
             dy += speed_sin
         if keys[pg.K_s]:
+            num_key_pressed += 1
             dx += -speed_cos
             dy += -speed_sin
         if keys[pg.K_a]:
-            dx += speed_cos
-            dy += -speed_sin
+            num_key_pressed += 1
+            dx += speed_sin
+            dy += -speed_cos
         if keys[pg.K_d]:
-            dx += -speed_cos
-            dy += speed_sin
+            num_key_pressed += 1
+            dx += -speed_sin
+            dy += speed_cos
+
+        # diag move correction
+        if num_key_pressed:
+            dx *= self.diag_move_corr
+            dy *= self.diag_move_corr
+
 
         self.check_wall_collision(dx,dy)
         
