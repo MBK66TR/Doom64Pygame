@@ -4,13 +4,12 @@ from settings import *
 
 
 class RayCasting:
-    def __init__(self,game):
+    def __init__(self, game):
         self.game = game
         self.ray_casting_result = []
-        self.object_to_render = []
+        self.objects_to_render = []
         self.textures = self.game.object_renderer.wall_textures
 
-        
     def get_objects_to_render(self):
         self.objects_to_render = []
         for ray, values in enumerate(self.ray_casting_result):
@@ -44,10 +43,10 @@ class RayCasting:
             sin_a = math.sin(ray_angle)
             cos_a = math.cos(ray_angle)
 
-            #horizontals
+            # horizontals
             y_hor, dy = (y_map + 1, 1) if sin_a > 0 else (y_map - 1e-6, -1)
 
-            depth_hor = (y_hor -oy) / sin_a
+            depth_hor = (y_hor - oy) / sin_a
             x_hor = ox + depth_hor * cos_a
 
             delta_depth = dy / sin_a
@@ -62,11 +61,11 @@ class RayCasting:
                 y_hor += dy
                 depth_hor += delta_depth
 
-            #verticals
+            # verticals
             x_vert, dx = (x_map + 1, 1) if cos_a > 0 else (x_map - 1e-6, -1)
 
-            depth_vert= (x_vert - ox) / cos_a
-            y_vert = oy +depth_vert * sin_a
+            depth_vert = (x_vert - ox) / cos_a
+            y_vert = oy + depth_vert * sin_a
 
             delta_depth = dx / cos_a
             dy = delta_depth * sin_a
@@ -84,25 +83,19 @@ class RayCasting:
             if depth_vert < depth_hor:
                 depth, texture = depth_vert, texture_vert
                 y_vert %= 1
-                offset = y_vert if cos_a > 0 else (1- y_vert)
+                offset = y_vert if cos_a > 0 else (1 - y_vert)
             else:
                 depth, texture = depth_hor, texture_hor
-                x_hor %=1
-                offset = (1-x_hor) if sin_a > 0 else x_hor
-                
+                x_hor %= 1
+                offset = (1 - x_hor) if sin_a > 0 else x_hor
 
             # remove fishbowl effect
             depth *= math.cos(self.game.player.angle - ray_angle)
 
-           # projection
+            # projection
             proj_height = SCREEN_DIST / (depth + 0.0001)
 
-           ## draw walls
-            #color = [255 / (1 + depth ** 5 * 0.00002)] * 3
-            #pg.draw.rect(self.game.screen, color,
-            #             (ray * SCALE, HALF_HEIGHT - proj_height // 2, SCALE, proj_height))
-
-            #raycasting result
+            # ray casting result
             self.ray_casting_result.append((depth, proj_height, texture, offset))
 
             ray_angle += DELTA_ANGLE
@@ -110,6 +103,3 @@ class RayCasting:
     def update(self):
         self.ray_cast()
         self.get_objects_to_render()
-
-
-
